@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sampling Schedule · Tasks Calendar — 120Utility (Calypso)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ================================================================
+     CALYPSO TOKENS — from 2026 Design System Foundation ramps
+     ================================================================ */
+  :root{
+    --brand:#294088;        /* secondary/900 — navy, the only accent */
+    --brand-2:#1C397A;      /* darker navy, hover + logo */
+    --brand-tint:#F3F4F8;   /* secondary/600 */
+    --brand-tint-2:#DCDFEB; /* secondary/800 */
+    --brand-line:#DDE1EC;   /* secondary/700 */
+
+    --text:#21252B; --text-2:#4A4F5A; --text-3:#888D97;
+    --surface:#FFFFFF; --surface-2:#F8F9FB; --surface-3:#F3F3F4;
+    --border:#DEDFE1; --border-2:#C9CBD1;
+
+    --ok:#007F4A; --ok-mid:#97CBB5; --ok-tint:#F0F8F5; --ok-line:#D6EBE2;
+    --warn:#AE6400; --warn-mid:#DEC097; --warn-tint:#FAF6F0; --warn-line:#F2E6D6;
+    --crit:#D70049; --crit-mid:#EE97B5; --crit-tint:#FDF0F5; --crit-line:#F9D6E2;
+    --gold:#FFBF00;
+
+    --r-card:8px; --r-pill:999px; --r-ctl:8px;
+    --shadow-1:0 1px 2px rgba(33,37,43,.06);
+    --shadow-2:0 10px 30px rgba(33,37,43,.14);
+    --sidebar-w:248px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:14px;line-height:1.4;color:var(--text);background:var(--surface-2);
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+  a{color:var(--brand)}
+  svg{display:block}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* type scale — Inter, 140% */
+  h1{font-size:28px;font-weight:600;line-height:1.4;letter-spacing:-.01em}
+  h2{font-size:24px;font-weight:600;line-height:1.4}
+  h3{font-size:20px;font-weight:600;line-height:1.4}
+  h4{font-size:16px;font-weight:600;line-height:1.4}
+  .caps{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
+
+  /* ================================================================
+     SHELL — sidebar header (nested groups) + content
+     ================================================================ */
+  .shell{display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr);min-height:100vh}
+  .sidebar{
+    position:sticky;top:0;height:100vh;overflow-y:auto;
+    background:var(--surface);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;
+  }
+  .brand{display:flex;align-items:center;padding:22px 20px 18px}
+  /* single-colour navy 120Water lockup — same asset as the State Dashboard */
+  .brand-logo{display:block;width:150px;max-width:100%;aspect-ratio:160/34;background:url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwIiBoZWlnaHQ9IjM0IiB2aWV3Qm94PSIwIDAgMTYwIDM0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMjIuOTQxMyAxNC43NDMxTDEzLjU0MTMgMC41NjA3MjZDMTMuNDI3NiAwLjM4ODQ0OSAxMy4yNzI1IDAuMjQ3MDA2IDEzLjA5MDEgMC4xNDkxMjZDMTIuOTA3NyAwLjA1MTI0NiAxMi43MDM3IDAgMTIuNDk2NSAwQzEyLjI4OTIgMCAxMi4wODUyIDAuMDUxMjQ2IDExLjkwMjggMC4xNDkxMjZDMTEuNzIwNCAwLjI0NzAwNiAxMS41NjU0IDAuMzg4NDQ5IDExLjQ1MTYgMC41NjA3MjZMMi4wNTM1NyAxNC43NDMxQzEuMDgyNjEgMTYuMjEyNyAwLjQzNjE2NiAxNy44NzA0IDAuMTU2OTA3IDE5LjYwNjdDLTAuMTIyMzUyIDIxLjM0MzEgLTAuMDI4MDcgMjMuMTE4NiAwLjQzMzUyOCAyNC44MTZDMC44OTUxMjcgMjYuNTEzNSAxLjcxMzU0IDI4LjA5NDIgMi44MzQ3NCAyOS40NTM5QzMuOTU1OTMgMzAuODEzNiA1LjM1NDQxIDMxLjkyMTQgNi45Mzc4MiAzMi43MDRMNy4xMjc4IDI2LjQ4MjhINS43MTgxOFYyNy4zMjkxQzUuODYxMDggMjcuNDEwOSA1Ljk3MjgzIDI3LjUzNzMgNi4wMzYwOSAyNy42ODg3QzYuMDk5MzUgMjcuODQwMSA2LjExMDU3IDI4LjAwODEgNi4wNjgwMiAyOC4xNjY0QzYuMDI1NDcgMjguMzI0OCA1LjkzMTUyIDI4LjQ2NDggNS44MDA3NiAyOC41NjQ3QzUuNjcgMjguNjY0NSA1LjUwOTc1IDI4LjcxODcgNS4zNDQ4OCAyOC43MTg3QzUuMTgwMDIgMjguNzE4NyA1LjAxOTc3IDI4LjY2NDUgNC44ODkwMSAyOC41NjQ3QzQuNzU4MjUgMjguNDY0OCA0LjY2NDMgMjguMzI0OCA0LjYyMTc1IDI4LjE2NjRDNC41NzkxOSAyOC4wMDgxIDQuNTkwNDIgMjcuODQwMSA0LjY1MzY3IDI3LjY4ODdDNC43MTY5MyAyNy41MzczIDQuODI4NjkgMjcuNDEwOSA0Ljk3MTU4IDI3LjMyOTFWMjYuNDgwOUg0Ljk1NDQ4QzQuOTA3NjcgMjYuNDgxMSA0Ljg2MTI3IDI2LjQ3MjIgNC44MTc5NSAyNi40NTQ1QzQuNzc0NjMgMjYuNDM2OSA0LjczNTI0IDI2LjQxMDkgNC43MDIwNSAyNi4zNzgxQzQuNjY4ODYgMjYuMzQ1MyA0LjY0MjUzIDI2LjMwNjIgNC42MjQ1NSAyNi4yNjMyQzQuNjA2NTggMjYuMjIwMiA0LjU5NzMzIDI2LjE3NDIgNC41OTczMyAyNi4xMjc2VjI0Ljg1NjJDNC41OTczMyAyNC43NjIgNC42MzQ5NiAyNC42NzE2IDQuNzAxOTQgMjQuNjA1QzQuNzY4OTIgMjQuNTM4NCA0Ljg1OTc2IDI0LjUwMSA0Ljk1NDQ4IDI0LjUwMUg0Ljk3MTU4VjIzLjY1NjVDNC44MjkyNSAyMy41NzQ4IDQuNzE4MDEgMjMuNDQ4NiA0LjY1NTExIDIzLjI5NzZDNC41OTIyMiAyMy4xNDY2IDQuNTgxMTggMjIuOTc5MiA0LjYyMzcyIDIyLjgyMTNDNC42NjYyNiAyMi42NjM1IDQuNzU5OTkgMjIuNTI0IDQuODkwMzggMjIuNDI0NUM1LjAyMDc3IDIyLjMyNSA1LjE4MDUzIDIyLjI3MSA1LjM0NDg4IDIyLjI3MUM1LjUwOTI0IDIyLjI3MSA1LjY2OSAyMi4zMjUgNS43OTkzOCAyMi40MjQ1QzUuOTI5NzcgMjIuNTI0IDYuMDIzNTEgMjIuNjYzNSA2LjA2NjA0IDIyLjgyMTNDNi4xMDg1OCAyMi45NzkyIDYuMDk3NTUgMjMuMTQ2NiA2LjAzNDY1IDIzLjI5NzZDNS45NzE3NiAyMy40NDg2IDUuODYwNTIgMjMuNTc0OCA1LjcxODE4IDIzLjY1NjVWMjQuNTAxSDcuNDkwNjVWMTguODU2QzcuNDkwNjUgMTcuMjA2NyA3LjUyMjk0IDE1LjkyMzkgOC40NDA1MiAxNC4zOTM2QzEwLjYyMzMgMTAuNzYyNSAxNS44MTM0IDExLjE2MTIgMTcuNzcyMSAxNi4yMjA1TDE4Ljc0ODYgMTguOTE0NUMxOC43Njc4IDE4Ljk2OCAxOC43NzM4IDE5LjAyNTMgMTguNzY2IDE5LjA4MTVDMTguNzU4MyAxOS4xMzc4IDE4LjczNyAxOS4xOTE0IDE4LjcwNCAxOS4yMzc3QzE4LjY3MSAxOS4yODQxIDE4LjYyNzMgMTkuMzIxOCAxOC41NzY1IDE5LjM0NzhDMTguNTI1NyAxOS4zNzM3IDE4LjQ2OTQgMTkuMzg3MSAxOC40MTIzIDE5LjM4NjhIMTYuMzcyQzE2LjMyNTMgMTkuMzg2OCAxNi4yNzkxIDE5LjM3NzcgMTYuMjM2IDE5LjM2QzE2LjE5MjkgMTkuMzQyMiAxNi4xNTM4IDE5LjMxNjIgMTYuMTIwOCAxOS4yODM0QzE2LjA4NzggMTkuMjUwNiAxNi4wNjE2IDE5LjIxMTYgMTYuMDQzOCAxOS4xNjg4QzE2LjAyNTkgMTkuMTI1OSAxNi4wMTY3IDE5LjA4IDE2LjAxNjcgMTkuMDMzNlYxNy4zMzMzTDE1Ljg2ODUgMTYuOTI3MUMxNS4yMDM2IDE1LjIyNjggMTQuMDIyIDE0LjEzNDggMTIuNzA3NCAxNC4wMjMzQzExLjY5NDggMTMuOTM4MyAxMC43NzUzIDE0LjQ0ODQgMTAuMTg0NSAxNS40Mjg5QzkuNTUxODggMTYuNDg1IDkuNTIxNDggMTcuMzI5NSA5LjUyMTQ4IDE4Ljg1NlYyNC41MDFIOS45NDMyMkMxMC4wMzc2IDI0LjUwMTUgMTAuMTI4IDI0LjUzOTEgMTAuMTk0NSAyNC42MDU3QzEwLjI2MTEgMjQuNjcyMiAxMC4yOTg1IDI0Ljc2MjMgMTAuMjk4NSAyNC44NTYyTDEwLjU0NTQgMzMuODQ4OUMxMS4xOTE2IDMzLjk0OTEgMTEuODQ0NSAzMy45OTk2IDEyLjQ5ODQgMzRDMTQuNzUzOSAzNC4wMDAyIDE2Ljk2NzUgMzMuMzkzNiAxOC45MDQ0IDMyLjI0NDNDMjAuODQxNCAzMS4wOTUgMjIuNDI5NiAyOS40NDYgMjMuNTAwNyAyNy40NzJDMjQuNTcxOCAyNS40OTggMjUuMDg1OCAyMy4yNzI2IDI0Ljk4ODMgMjEuMDMxN0MyNC44OTA4IDE4Ljc5MDcgMjQuMTg1NSAxNi42MTc4IDIyLjk0NyAxNC43NDMxSDIyLjk0MTNaTTE3LjQ1NDggMjMuNzM0QzE3LjI1NTkgMjMuNzMzMiAxNy4wNjA4IDIzLjY3OTMgMTYuODkgMjMuNTc3OUMxNi43MTkyIDIzLjQ3NjUgMTYuNTc5IDIzLjMzMTIgMTYuNDg0IDIzLjE1NzRDMTYuMzg5IDIyLjk4MzYgMTYuMzQyOCAyMi43ODc1IDE2LjM1MDIgMjIuNTg5OEMxNi4zNTc1IDIyLjM5MjEgMTYuNDE4MiAyMi4yIDE2LjUyNTggMjIuMDMzN0wxNy4zNjE3IDIwLjc3MzVDMTcuMzcxNSAyMC43NTcxIDE3LjM4NTMgMjAuNzQzNCAxNy40MDIgMjAuNzM0QzE3LjQxODcgMjAuNzI0NSAxNy40Mzc1IDIwLjcxOTUgMTcuNDU2NyAyMC43MTk1QzE3LjQ3NTkgMjAuNzE5NSAxNy40OTQ4IDIwLjcyNDUgMTcuNTExNCAyMC43MzRDMTcuNTI4MSAyMC43NDM0IDE3LjU0MiAyMC43NTcxIDE3LjU1MTcgMjAuNzczNUwxOC4zODc2IDIyLjAzMzdDMTguNDk1MiAyMi4xOTk5IDE4LjU1NTggMjIuMzkxOCAxOC41NjMzIDIyLjU4OTNDMTguNTcwNyAyMi43ODY5IDE4LjUyNDcgMjIuOTgyOCAxOC40Mjk5IDIzLjE1NjZDMTguMzM1MiAyMy4zMzAzIDE4LjE5NTIgMjMuNDc1NiAxOC4wMjQ3IDIzLjU3NzJDMTcuODU0MSAyMy42Nzg4IDE3LjY1OTMgMjMuNzMyOSAxNy40NjA1IDIzLjczNEgxNy40NTQ4WiIgZmlsbD0iIzFDMzk3QSIvPgo8cGF0aCBkPSJNMzMuMzI5NCAyNy4xNTg1SDM3LjkxOTdWMTUuNDA3M0MzNy45MTk3IDE0LjY4OSAzNy45NTIxIDEzLjk3NjIgMzcuOTUyMSAxMy45NzYySDM3Ljg5MjdDMzcuNjQ5NyAxNC40MjAyIDM3LjMzOCAxNC44MjMgMzYuOTY5MyAxNS4xNjk3TDM1LjI2ODEgMTYuNzg5OEwzMyAxNC40MDI4TDM4LjMxMzkgOS4yOTQxSDQxLjY4MzhWMjcuMTU4NUg0Ni4yNzk1VjMwLjQ2ODlIMzMuMzE4NkwzMy4zMjk0IDI3LjE1ODVaIiBmaWxsPSIjMUMzOTdBIi8+CjxwYXRoIGQ9Ik00OS4wNzA5IDI4LjU4OTVDNDkuMDcwOSAyMC45NTM1IDU4Ljk3NTEgMTkuNzMzIDU4Ljk3NTEgMTUuNTI2MUM1OC45NzUxIDEzLjY3OTIgNTcuNTQ0IDEyLjU3MjEgNTUuNzM0OSAxMi41NzIxQzUzLjI2MTYgMTIuNTcyMSA1MS45MjIzIDE1LjA3NzkgNTEuOTIyMyAxNS4wNzc5TDQ5LjA1NDcgMTMuMTcxNkM0OS43MTk2IDExLjg4NTggNTAuNzI3NCAxMC44MDkyIDUxLjk2NjUgMTAuMDYwOUM1My4yMDU2IDkuMzEyNzEgNTQuNjI3NyA4LjkyMjA2IDU2LjA3NTEgOC45MzIyOEM1OS44MDY4IDguOTMyMjggNjIuOTY2IDExLjIwMDQgNjIuOTY2IDE1LjE5NjdDNjIuOTY2IDIyLjAwMTEgNTMuNDgzIDIzLjE2MjIgNTMuMzkxMiAyNy4xNTg1SDYzLjI5NTRWMzAuNDY4OUg0OS4yNTQ1QzQ5LjE1NDUgMjkuODQ2OCA0OS4wOTMyIDI5LjIxOTIgNDkuMDcwOSAyOC41ODk1WiIgZmlsbD0iIzFDMzk3QSIvPgo8cGF0aCBkPSJNNjUuOTgwNSAxOS44NTE4QzY1Ljk4MDUgMTMuNzY1NiA2Ny44NTk4IDguOTMyMjggNzMuNjQzNiA4LjkzMjI4Qzc5LjQyNzMgOC45MzIyOCA4MS4zMzkxIDEzLjc5MjYgODEuMzM5MSAxOS44NTE4QzgxLjMzOTEgMjUuOTExIDc5LjQzMjcgMzAuODI1MyA3My42NDM2IDMwLjgyNTNDNjcuODU0NCAzMC44MjUzIDY1Ljk4MDUgMjUuOTM4IDY1Ljk4MDUgMTkuODUxOFpNNzcuMzc1MiAxOS44NTE4Qzc3LjM3NTIgMTUuNzM2NyA3Ni41MzgyIDEyLjQ4NTcgNzMuNjQzNiAxMi40ODU3QzcwLjc0OSAxMi40ODU3IDY5LjkxNzMgMTUuNzI1OSA2OS45MTczIDE5Ljg1MThDNjkuOTE3MyAyMy45Nzc3IDcwLjc1NDQgMjcuMzA5NyA3My42NDM2IDI3LjMwOTdDNzYuNTMyOCAyNy4zMDk3IDc3LjM3NTIgMjQuMDI2MyA3Ny4zNzUyIDE5Ljg1MThaIiBmaWxsPSIjMUMzOTdBIi8+CjxwYXRoIGQ9Ik05Ni43ODU0IDEyLjU3MjFDOTYuNzg1NCAxMi41NzIxIDk2LjQ2MTMgMTQuMzY1IDk2LjA5OTUgMTUuNzA0M0w5Mi4xMDMzIDMwLjQ2ODlIODkuNjE5MUw4NC4yMTg4IDkuNTA0NzFIODYuMzc4OUw5MC40Mzk5IDI1Ljc5MjJDOTAuNzA0NiAyNi44NzIyIDkwLjkxNTIgMjguMDI3OSA5MC45MTUyIDI4LjAyNzlIOTAuOTc0NkM5MS4wMDE2IDI4LjAyNzkgOTEuMTUyOCAyNi44NjY4IDkxLjQ0OTggMjUuNzkyMkw5NS44MzQ5IDkuNTA0NzFIOTcuODAwNkwxMDIuMjE4IDI1Ljc5MjJDMTAyLjUxNSAyNi44NzIyIDEwMi42NjYgMjguMDI3OSAxMDIuNjkzIDI4LjAyNzlIMTAyLjc1M0MxMDIuNzUzIDI4LjAyNzkgMTAyLjk2MyAyNi44NjY4IDEwMy4yMjggMjUuNzkyMkwxMDcuNDQgOS41MDQ3MUgxMDkuNkwxMDQuMDIyIDMwLjQ3NDNIMTAxLjU0OEw5Ny41NTIyIDE1LjcwOTdDOTcuMTkwNCAxNC4zNzA0IDk2Ljg2NjQgMTIuNTc3NSA5Ni44NjY0IDEyLjU3NzVMOTYuNzg1NCAxMi41NzIxWiIgZmlsbD0iIzFDMzk3QSIvPgo8cGF0aCBkPSJNMTE5LjA3NyAyMS4xOTExSDExOS45MDhWMjAuODA3NkMxMTkuOTA4IDE3LjkxMzEgMTE4LjMzMSAxNi45MzAyIDExNi4xODIgMTYuOTMwMkMxMTQuNjU2IDE2Ljk1MzMgMTEzLjE3NSAxNy40NTM4IDExMS45NDggMTguMzYxM0wxMTAuOTkyIDE2LjgxMTRDMTEyLjUzMyAxNS42NjQ0IDExNC40MTMgMTUuMDY1NiAxMTYuMzMzIDE1LjExMDNDMTE5Ljk0MSAxNS4xMTAzIDEyMS45MzkgMTcuMTA4NCAxMjEuOTM5IDIwLjg2N1YzMC40Njg5SDEyMFYyOC44NDg4QzExOS45OTggMjguNDMwNCAxMjAuMDE4IDI4LjAxMjIgMTIwLjA1OSAyNy41OTU5SDEyMEMxMTkuNTc2IDI4LjU2ODcgMTE4Ljg3NCAyOS4zOTQ4IDExNy45ODMgMjkuOTcxMUMxMTcuMDkxIDMwLjU0NzQgMTE2LjA1IDMwLjg0ODMgMTE0Ljk4OSAzMC44MzYxQzExMi40ODMgMzAuODM2MSAxMDkuODkxIDI5LjM3OCAxMDkuODkxIDI2LjM5N0MxMDkuODkxIDIxLjMxNTMgMTE2LjQ3OSAyMS4xOTExIDExOS4wNzcgMjEuMTkxMVpNMTE1LjI5NiAyOS4wOTcyQzExOC4xNTkgMjkuMDk3MiAxMTkuODg3IDI2LjExNjIgMTE5Ljg4NyAyMy41MTg2VjIyLjg2NTJIMTE5LjAyM0MxMTYuNjY4IDIyLjg2NTIgMTExLjk1NCAyMi45NTE2IDExMS45NTQgMjYuMjYyQzExMS45NzUgMjcuNjY2MSAxMTMuMDgyIDI5LjA5NzIgMTE1LjMxOCAyOS4wOTcySDExNS4yOTZaIiBmaWxsPSIjMUMzOTdBIi8+CjxwYXRoIGQ9Ik0xNDIuMzE1IDE1LjExMDNDMTQ2LjQ2MiAxNS4xMTAzIDE0OC41NzkgMTguMzAxOSAxNDguNTc5IDIyLjAyODFDMTQ4LjU3OSAyMi4zODQ1IDE0OC41MiAyMy4wNzA0IDE0OC41MiAyMy4wNzA0SDEzNy4wMDZDMTM3LjA5OCAyNi45MjA4IDEzOS43MDcgMjkuMDEwOCAxNDIuODIzIDI5LjAxMDhDMTQ0LjUxNCAyOC45Nzc0IDE0Ni4xMzYgMjguMzMwNyAxNDcuMzg2IDI3LjE5MDlMMTQ4LjMxNSAyOC43NDA4QzE0Ni43NjggMzAuMDY4NyAxNDQuODAyIDMwLjgwNzEgMTQyLjc2MyAzMC44MjUzQzEzOC4yOTIgMzAuODI1MyAxMzQuOTIyIDI3LjU4NTEgMTM0LjkyMiAyMi45ODRDMTM0LjkyMiAxOC4wNTg5IDEzOC4yNTkgMTUuMTEwMyAxNDIuMzE1IDE1LjExMDNaTTE0Ni41MjIgMjEuMzg1NUMxNDYuNDAzIDE4LjI1MzMgMTQ0LjQ5NyAxNi43OTUyIDE0Mi4yNTYgMTYuNzk1MkMxMzkuNzUgMTYuNzk1MiAxMzcuNTczIDE4LjM3MjEgMTM3LjA5OCAyMS4zODU1SDE0Ni41MjJaIiBmaWxsPSIjMUMzOTdBIi8+CjxwYXRoIGQ9Ik0xNTIuNDQ5IDE1LjQ0NTFIMTU0LjQ0N1YxOC4xNDUzQzE1NC40NDcgMTguNzk4NyAxNTQuMzg4IDE5LjMzODggMTU0LjM4OCAxOS4zMzg4SDE1NC40NDdDMTU1LjE2NiAxNy4wNzA2IDE1Ni44MzQgMTUuMzM3MSAxNTkuMTk0IDE1LjMzNzFDMTU5LjQ2NSAxNS4zNDAyIDE1OS43MzUgMTUuMzcwOSAxNTkuOTk5IDE1LjQyODlWMTcuNDI3QzE1OS43NTIgMTcuMzg5NCAxNTkuNTAzIDE3LjM2OTYgMTU5LjI1NCAxNy4zNjc2QzE1Ny4xMzEgMTcuMzY3NiAxNTUuNTU0IDE5LjAzNjMgMTU0Ljg5NiAyMS4yNDUxQzE1NC42MTIgMjIuMTkyOCAxNTQuNDcyIDIzLjE3NzUgMTU0LjQ4IDI0LjE2NjdWMzAuNDkwNUgxNTIuNDQ5VjE1LjQ0NTFaIiBmaWxsPSIjMUMzOTdBIi8+CjxwYXRoIGQ9Ik0xMjYuNzE2IDE3LjE2NzhIMTI0Ljc1VjE1LjQ0NTFIMTI2Ljc0OFY5LjUwNDcxSDEyOC43NDZWMTUuNDQ1MUgxMzIuNTI2VjE3LjE0NjJIMTI4Ljc0NlYyNC43ODIzQzEyOC43NDYgMjguMjk3OSAxMzAuOTgyIDI4Ljc0NjIgMTMyLjExNiAyOC43NDYyQzEzMi4zNDYgMjguNzQ4OCAxMzIuNTc2IDI4LjcyODkgMTMyLjgwMiAyOC42ODY4VjMwLjUwNjdDMTMyLjUxNiAzMC41NDk2IDEzMi4yMjcgMzAuNTY5NCAxMzEuOTM4IDMwLjU2NjFDMTMwLjIwNCAzMC41NjYxIDEyNi43MTYgMzAuMDI2IDEyNi43MTYgMjQuOTg3NVYxNy4xNjc4WiIgZmlsbD0iIzFDMzk3QSIvPgo8L3N2Zz4K") left center/contain no-repeat}
+  .brand .name{font-size:16px;font-weight:700;letter-spacing:-.01em;color:var(--brand-2)}
+  .brand .name span{font-weight:500;color:var(--text-2)}
+  .sb-search{
+    margin:0 14px 10px;display:flex;align-items:center;gap:8px;
+    border:1px solid var(--border);border-radius:var(--r-ctl);padding:8px 10px;color:var(--text-3);
+    background:var(--surface-2);font-size:13px;
+  }
+  .nav{padding:4px 10px 16px;flex:1}
+  .grp{margin-bottom:2px}
+  .grp-btn{
+    width:100%;display:flex;align-items:center;gap:10px;text-align:left;
+    padding:9px 10px;border-radius:var(--r-ctl);font-size:14px;font-weight:600;color:var(--text-2);
+  }
+  .grp-btn:hover{background:var(--surface-3)}
+  .grp-btn .ico{width:18px;height:18px;color:var(--text-3);flex:none}
+  .grp-btn .chev{margin-left:auto;width:16px;height:16px;color:var(--text-3);transition:transform .18s ease}
+  .grp.open .grp-btn{color:var(--text)}
+  .grp.open .grp-btn .ico{color:var(--brand)}
+  .grp.open .grp-btn .chev{transform:rotate(180deg)}
+  .grp-items{display:none;flex-direction:column;gap:1px;padding:2px 0 6px 22px}
+  .grp.open .grp-items{display:flex}
+  .nav-item{
+    display:flex;align-items:center;gap:8px;padding:7px 10px 7px 14px;border-radius:var(--r-ctl);
+    font-size:14px;color:var(--text-2);text-decoration:none;position:relative;
+  }
+  .nav-item:hover{background:var(--surface-3);color:var(--text)}
+  .nav-item.active{background:var(--brand-tint);color:var(--brand);font-weight:600}
+  .nav-item.active::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:3px;background:var(--brand)}
+  .sb-foot{border-top:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;gap:10px}
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--brand-tint-2);color:var(--brand);display:grid;place-items:center;font-size:12px;font-weight:700}
+  .sb-foot .who{min-width:0;line-height:1.3}
+  .sb-foot .who b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sb-foot .who span{font-size:12px;color:var(--text-3)}
+
+  .content{min-width:0;display:flex;flex-direction:column}
+  .topbar{
+    display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:12px 28px;
+    background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;
+  }
+  .crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-3)}
+  .crumbs a{color:var(--text-3);text-decoration:none}
+  .crumbs a:hover{color:var(--brand);text-decoration:underline}
+  .crumbs b{color:var(--text);font-weight:600}
+  .crumbs .sep{color:var(--border-2)}
+  .topbar .spacer{flex:1}
+  .icon-btn{
+    width:36px;height:36px;border-radius:var(--r-ctl);display:grid;place-items:center;color:var(--text-2);position:relative;
+  }
+  .icon-btn:hover{background:var(--surface-3);color:var(--text)}
+  .icon-btn .dot{position:absolute;top:6px;right:6px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--brand);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;border:2px solid var(--surface)}
+
+  .page{padding:24px 28px 40px;display:flex;flex-direction:column;gap:18px;flex:1}
+  .page-head{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+  .page-head .sub{color:var(--text-2);margin-top:2px}
+  .page-head .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+
+  /* ================================================================
+     CONTROLS
+     ================================================================ */
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+    border:1px solid var(--border-2);border-radius:var(--r-pill);padding:9px 16px;
+    font-size:14px;font-weight:600;color:var(--text);background:var(--surface);
+    transition:background .12s ease,border-color .12s ease,color .12s ease;
+  }
+  .btn:hover{background:var(--surface-2);border-color:var(--text-3)}
+  .btn svg{flex:none;color:var(--text-2)}
+  .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn.primary svg{color:#fff}
+  .btn.primary:hover{background:var(--brand-2);border-color:var(--brand-2)}
+  .btn.ghost{border-color:transparent;background:transparent;color:var(--brand)}
+  .btn.ghost:hover{background:var(--brand-tint);border-color:transparent}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .btn[disabled]{background:var(--surface-3);border-color:var(--border);color:var(--text-3);cursor:not-allowed}
+  .btn[disabled] svg{color:var(--text-3)}
+  .btn.on{background:var(--brand-tint);border-color:var(--brand);color:var(--brand)}
+  .btn.on svg{color:var(--brand)}
+  .btn .badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--brand);color:#fff;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+
+  .seg{display:inline-flex;padding:3px;border:1px solid var(--border);border-radius:var(--r-pill);background:var(--surface)}
+  .seg button{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:var(--r-pill);font-size:13px;font-weight:600;color:var(--text-2)}
+  .seg button svg{color:var(--text-3)}
+  .seg button:hover{color:var(--text)}
+  .seg button[aria-pressed="true"]{background:var(--brand);color:#fff}
+  .seg button[aria-pressed="true"] svg{color:#fff}
+
+  .sel,.inp,.ta{
+    width:100%;font:inherit;font-size:14px;color:var(--text);background:var(--surface);
+    border:1px solid var(--border-2);border-radius:var(--r-ctl);padding:9px 12px;outline:none;
+  }
+  .inp:focus,.sel:focus,.ta:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint-2)}
+  .inp::placeholder,.ta::placeholder{color:var(--text-3)}
+  .sel{cursor:pointer;appearance:none;padding-right:34px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%23888D97' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 11px center;}
+  .sel.pill{border-radius:var(--r-pill);width:auto;font-weight:600;padding:9px 36px 9px 16px}
+  .ta{min-height:88px;resize:vertical}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:13px;font-weight:600;color:var(--text-2)}
+  .field label .req{color:var(--crit)}
+  .field .hint{font-size:12px;color:var(--text-3)}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .with-ico{position:relative}
+  .with-ico .inp{padding-right:36px}
+  .with-ico svg{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none}
+
+  .chk{appearance:none;width:16px;height:16px;border:1.5px solid var(--border-2);border-radius:4px;background:var(--surface);display:inline-grid;place-items:center;flex:none;cursor:pointer;margin:0}
+  .chk:checked{background:var(--brand);border-color:var(--brand)}
+  .chk:checked::after{content:"";width:9px;height:5px;border:2px solid #fff;border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
+  .chk:indeterminate{background:var(--brand);border-color:var(--brand)}
+  .chk:indeterminate::after{content:"";width:8px;height:2px;background:#fff}
+
+  .note{display:flex;gap:10px;align-items:flex-start;border-radius:var(--r-ctl);padding:10px 12px;font-size:13px;line-height:1.5}
+  .note.warn{background:var(--warn-tint);color:var(--warn);border:1px solid var(--warn-line)}
+  .note.info{background:var(--brand-tint);color:var(--brand);border:1px solid var(--brand-line)}
+  .note svg{flex:none;margin-top:1px}
+
+  /* ================================================================
+     CALENDAR CARD
+     ================================================================ */
+  .work{display:flex;gap:0;align-items:stretch;flex:1;min-height:0}
+  .cal-card{
+    flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);
+    box-shadow:var(--shadow-1);display:flex;flex-direction:column;overflow:hidden;
+  }
+  .cal-head{display:flex;align-items:center;gap:14px;padding:18px 20px 14px;flex-wrap:wrap}
+  .cal-head .month{display:flex;align-items:center;gap:6px}
+  .cal-head .month h2{min-width:170px}
+  .nav-arrow{width:32px;height:32px;border-radius:var(--r-ctl);display:grid;place-items:center;color:var(--text-2)}
+  .nav-arrow:hover{background:var(--surface-3);color:var(--text)}
+  .saved{font-size:13px;color:var(--ok);display:inline-flex;align-items:center;gap:6px;margin-left:6px}
+  .saved svg{color:var(--ok)}
+  .saved[hidden]{display:none}
+  .saved.pending{color:var(--text-3)}
+  .saved.pending svg{color:var(--text-3)}
+  .cal-head .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+
+  .cal-help{padding:0 20px 14px;color:var(--text-2);font-size:13px}
+
+  .cal-tools{
+    display:flex;align-items:center;gap:12px;padding:10px 20px;
+    border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface-2);
+  }
+  .cal-tools .count{font-size:13px;color:var(--text-2);font-variant-numeric:tabular-nums}
+  .cal-tools .count b{color:var(--text);font-weight:600}
+  .cal-tools .right{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .cal-tools .link{font-size:13px;font-weight:600;color:var(--text-2);padding:6px 8px;border-radius:var(--r-ctl)}
+  .cal-tools .link:hover{color:var(--crit);background:var(--surface-3)}
+
+  /* grid */
+  .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));align-content:start;flex:1}
+  .cal-grid.week .chip .nm{white-space:normal;line-height:1.35}
+  .dow{
+    padding:10px 12px 8px;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);
+    border-bottom:1px solid var(--border);background:var(--surface);
+  }
+  .dow.wknd{color:var(--border-2)}
+  .day{
+    min-height:128px;padding:8px 8px 10px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+    display:flex;flex-direction:column;gap:4px;position:relative;background:var(--surface);
+    transition:background .12s ease,box-shadow .12s ease;
+  }
+  .day:nth-child(7n){border-right:0}
+  .cal-grid.week .day{min-height:420px}
+  .day.out{background:var(--surface-2)}
+  .day.out .dnum{color:var(--text-3)}
+  .day.wknd:not(.out){background:#FCFCFD}
+  .day.drop-ok{background:var(--brand-tint);box-shadow:inset 0 0 0 2px var(--brand)}
+  .day.target-mode:hover{background:var(--brand-tint);box-shadow:inset 0 0 0 2px var(--brand-tint-2);cursor:copy}
+  .dnum{
+    display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;padding:0 6px;border-radius:999px;
+    font-size:13px;font-weight:600;color:var(--text-2);font-variant-numeric:tabular-nums;align-self:flex-start;
+  }
+  .day.today .dnum{background:var(--brand);color:#fff}
+  .day .dcount{position:absolute;top:11px;right:10px;font-size:11px;color:var(--text-3);font-variant-numeric:tabular-nums}
+
+  /* task chips — color as accent, left border */
+  .chip{
+    display:flex;align-items:center;gap:6px;width:100%;text-align:left;
+    border:1px solid var(--border);border-left:3px solid var(--brand);border-radius:6px;
+    background:var(--surface);min-height:40px;padding:6px 8px 6px 10px;font-size:13px;line-height:1.3;color:var(--text);
+    cursor:grab;user-select:none;position:relative;transition:background .12s ease,border-color .12s ease,box-shadow .12s ease;
+  }
+  .chip:hover{background:var(--brand-tint);border-color:var(--brand-line);border-left-color:var(--brand)}
+  .chip:active{cursor:grabbing}
+  .chip.dragging{opacity:.45}
+  .chip.sel{background:var(--brand-tint);border-color:var(--brand);box-shadow:0 0 0 1px var(--brand) inset}
+  /* Calypso checkbox target: the label is pinned to the full height of the card
+     (not padded around the box) and shows its own hover fill, so the hit area and
+     the highlight match exactly. Clicking anywhere else on the card opens the task. */
+  .chip:has(.chip-chk){padding-left:0}
+  .chip-chk{
+    flex:none;align-self:stretch;width:36px;margin:-6px 0 -6px 0;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:0 5px 5px 0;cursor:pointer;transition:background .12s ease;
+  }
+  .chip-chk:hover{background:var(--surface-3)}
+  .chip:hover .chip-chk:hover,.chip.sel .chip-chk:hover{background:#E4E5E8}
+  .chip-chk:focus-within{background:var(--surface-3);box-shadow:inset 0 0 0 2px var(--brand)}
+  .chip .chk{width:16px;height:16px}
+  .chip .nm{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+  .chip .nm small{color:var(--text-3);font-weight:400}
+  .chip .who{flex:none;width:18px;height:18px;border-radius:50%;background:var(--ok-tint);color:var(--ok);font-size:9px;font-weight:700;display:grid;place-items:center;border:1px solid var(--ok-line)}
+  .chip .grip{flex:none;color:var(--border-2);width:10px}
+  .chip:hover .grip{color:var(--text-3)}
+  .chip.assigned{border-left-color:var(--ok)}
+  .chip.assigned:hover{background:var(--ok-tint);border-color:var(--ok-line);border-left-color:var(--ok)}
+  .chip.done{border-left-color:var(--ok-mid);color:var(--text-3)}
+  .chip.done .nm{text-decoration:line-through}
+  .chip.overdue{border-left-color:var(--crit)}
+  .more{
+    align-self:flex-start;margin-top:2px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;color:var(--brand);
+  }
+  .more:hover{background:var(--brand-tint)}
+
+  /* due-date summary chip */
+  .due{
+    display:flex;flex-direction:column;gap:5px;width:100%;text-align:left;
+    border:1px solid var(--border);border-left:3px solid var(--brand);border-radius:6px;background:var(--surface);
+    padding:7px 8px 8px 9px;font-size:12.5px;color:var(--text);cursor:pointer;
+  }
+  .due:hover{background:var(--brand-tint);border-color:var(--brand-line);border-left-color:var(--brand)}
+  .due .l{display:flex;align-items:center;gap:6px}
+  .due .l b{font-weight:600;font-variant-numeric:tabular-nums}
+  .due .l span{color:var(--text-2)}
+  .due .l svg{margin-left:auto;color:var(--text-3)}
+  .due .bar{height:4px;border-radius:2px;background:var(--surface-3);overflow:hidden}
+  .due .bar i{display:block;height:100%;background:var(--brand);border-radius:2px}
+  .due.ok{border-left-color:var(--ok)}
+  .due.ok .bar i{background:var(--ok)}
+  .due.ok:hover{background:var(--ok-tint);border-color:var(--ok-line);border-left-color:var(--ok)}
+  .due.crit{border-left-color:var(--crit)}
+  .due.crit .bar i{background:var(--crit)}
+  .due.crit .l span{color:var(--crit)}
+  .due.crit:hover{background:var(--crit-tint);border-color:var(--crit-line);border-left-color:var(--crit)}
+
+  /* ================================================================
+     DAY POPOVER (overflow / due-date list)
+     ================================================================ */
+  .pop{
+    position:fixed;z-index:60;width:460px;max-width:calc(100vw - 32px);
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);box-shadow:var(--shadow-2);
+    display:none;flex-direction:column;max-height:min(560px,calc(100vh - 32px));
+  }
+  .pop.in{display:flex}
+  .pop-head{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--border)}
+  .pop-head h4{font-size:15px}
+  .pop-head .sub{font-size:12px;color:var(--text-3);margin-top:1px}
+  .pop-head .x{margin-left:auto}
+  .x{width:30px;height:30px;border-radius:var(--r-ctl);display:grid;place-items:center;color:var(--text-2);flex:none}
+  .x:hover{background:var(--surface-3);color:var(--text)}
+  .pop-all{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);font-size:13px;color:var(--text-2)}
+  .pop-all{padding:0 16px 0 0}
+  .pop-all[hidden]{display:none}
+  .pop-all label{flex:1;display:flex;align-items:center;gap:12px;cursor:pointer;min-height:44px;padding:0 0 0 20px}
+  .pop-all label:hover{background:var(--surface-3)}
+  .pop-all .n{margin-left:auto;font-variant-numeric:tabular-nums}
+  .pop-list{overflow-y:auto;padding:8px 10px 10px;display:flex;flex-direction:column;gap:6px}
+  /* Build a List behaviour: the whole row is the selection target. Only the
+     trailing "open" button does something else (opens task details). */
+  .prow{
+    display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:6px 6px 6px 12px;
+    border:1px solid var(--border);border-radius:var(--r-ctl);background:var(--surface);
+    text-align:left;font-size:13px;color:var(--text);cursor:pointer;
+    transition:background .12s ease,border-color .12s ease,box-shadow .12s ease;
+  }
+  .prow:hover{background:var(--surface-3);border-color:var(--border-2)}
+  .prow:has(.chk:checked){background:var(--brand-tint);border-color:var(--brand)}
+  .prow:has(.chk:checked):hover{background:#E9EBF2}
+  .prow:has(.chk:focus-visible){box-shadow:0 0 0 2px var(--brand)}
+  .prow .chk:focus-visible{outline:none}
+  /* Completed: not selectable. Flat, greyed and borderless so it reads as inert;
+     only the details button stays live. */
+  .prow.locked{cursor:default;background:var(--surface-2);border-color:transparent;color:var(--text-3)}
+  .prow.locked:hover{background:var(--surface-2);border-color:transparent}
+  .prow.locked .tx b{color:var(--text-3);font-weight:500}
+  .prow.locked .tx span,.prow.locked .tx em{color:var(--text-3) !important}
+  .prow.locked .done-ico{flex:none;width:16px;height:16px;color:var(--ok-mid)}
+  .prow.locked .st,.prow.locked .st.ok{background:transparent;color:var(--text-3);padding-left:0;padding-right:0}
+  .plist-sep{display:flex;align-items:center;gap:10px;margin:10px 4px 4px;font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)}
+  .plist-sep::after{content:"";flex:1;height:1px;background:var(--border)}
+  .prow .tx{min-width:0;flex:1}
+  .prow .tx b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .prow .tx span{display:block;font-size:12px;color:var(--text-3);margin-top:1px}
+  .prow .st{flex:none;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--surface-3);color:var(--text-2)}
+  .prow .st.ok{background:var(--ok-tint);color:var(--ok)}
+  .prow .st.crit{background:var(--crit-tint);color:var(--crit)}
+  .prow .st.brand{background:var(--brand-tint);color:var(--brand)}
+  .prow .open{
+    flex:none;width:36px;height:36px;border-radius:var(--r-ctl);display:grid;place-items:center;color:var(--text-3);
+  }
+  .prow .open:hover{background:var(--surface);color:var(--brand);box-shadow:inset 0 0 0 1px var(--border)}
+  .pop-foot{display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--border);background:var(--surface-2)}
+  .pop-foot .right{margin-left:auto;display:flex;gap:8px}
+
+  /* ================================================================
+     RIGHT-SIDE FLYOUT (Build a List pattern)
+     ================================================================ */
+  .scrim{position:fixed;inset:0;z-index:90;background:rgba(33,37,43,.34);opacity:0;pointer-events:none;transition:opacity .22s ease}
+  .scrim.in{opacity:1;pointer-events:auto}
+  .drawer{
+    position:fixed;top:0;right:0;bottom:0;z-index:91;width:min(560px,100vw);background:var(--surface);
+    border-left:1px solid var(--border);box-shadow:-18px 0 44px rgba(33,37,43,.16);
+    display:flex;flex-direction:column;transform:translateX(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);
+  }
+  .drawer:not(.in){box-shadow:none;visibility:hidden;transition:transform .26s cubic-bezier(.4,0,.2,1),visibility 0s .26s}
+  .drawer.in{transform:none}
+  @media (prefers-reduced-motion:reduce){.drawer,.scrim,.helper{transition:none}}
+  .dr-head{display:flex;align-items:flex-start;gap:12px;padding:18px 20px 14px;border-bottom:1px solid var(--border)}
+  .dr-head h3{font-size:18px}
+  .dr-head .sub{font-size:13px;color:var(--text-2);margin-top:2px}
+  .dr-head .x{margin-left:auto}
+  .dr-body{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+  .dr-foot{display:flex;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--surface-2)}
+  .dr-foot .right{margin-left:auto;display:flex;gap:8px}
+  .kv{display:grid;grid-template-columns:140px 1fr;gap:8px 14px;font-size:13px}
+  .kv dt{color:var(--text-3)}
+  .kv dd{color:var(--text);font-weight:500}
+  .status-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:var(--brand-tint);color:var(--brand)}
+  .status-pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .status-pill.ok{background:var(--ok-tint);color:var(--ok)}
+  .status-pill.crit{background:var(--crit-tint);color:var(--crit)}
+  .status-pill.warn{background:var(--warn-tint);color:var(--warn)}
+  .divider{height:1px;background:var(--border)}
+
+  /* ================================================================
+     SCHEDULING HELPER — non-modal right flyout; the calendar reflows
+     so tasks can be dragged (or picked, then placed) onto days
+     ================================================================ */
+  .helper{
+    align-self:flex-start;position:sticky;top:16px;
+    width:0;flex:none;overflow:hidden;opacity:0;transition:width .26s cubic-bezier(.4,0,.2,1),opacity .2s ease;
+    margin-left:0;
+  }
+  .helper.in{width:360px;opacity:1;margin-left:16px}
+  .helper-inner{
+    width:360px;height:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);
+    box-shadow:var(--shadow-1);display:flex;flex-direction:column;position:sticky;top:16px;height:auto;max-height:calc(100vh - 32px);
+  }
+  .hp-head{display:flex;align-items:flex-start;gap:10px;padding:16px 16px 12px;border-bottom:1px solid var(--border)}
+  .hp-head h3{font-size:16px}
+  .hp-head .sub{font-size:12.5px;color:var(--text-2);margin-top:2px;line-height:1.45}
+  .hp-head .x{margin-left:auto}
+  .hp-body{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+  .hp-search{display:flex;align-items:center;gap:8px;border:1px solid var(--border-2);border-radius:var(--r-ctl);padding:8px 10px;color:var(--text-3)}
+  .hp-search:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint-2)}
+  .hp-search input{border:0;background:none;outline:none;font:inherit;font-size:14px;color:var(--text);width:100%;min-width:0}
+  .hp-search input::placeholder{color:var(--text-3)}
+  .hp-lead{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin-top:4px}
+  .mr{
+    display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--border);border-radius:var(--r-card);
+    padding:10px 12px;background:var(--surface);
+  }
+  .mr:hover{border-color:var(--brand);background:var(--brand-tint)}
+  .mr .tx{min-width:0;flex:1}
+  .mr .tx b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mr .tx span{display:block;font-size:12px;color:var(--text-2);margin-top:3px;font-variant-numeric:tabular-nums}
+  .mr .tx span.warn{color:var(--warn)}
+  .mr .tx span.ok{color:var(--ok)}
+  .mr .ring{flex:none;width:34px;height:34px;position:relative}
+  .mr .ring svg{width:34px;height:34px;transform:rotate(-90deg)}
+  .mr .ring circle{fill:none;stroke-width:3.5}
+  .mr .ring .bg{stroke:var(--surface-3)}
+  .mr .ring .fg{stroke:var(--brand);stroke-linecap:round}
+  .mr .ring.ok .fg{stroke:var(--ok)}
+  .mr .ring .pct{position:absolute;inset:0;display:grid;place-items:center;font-size:9.5px;font-weight:700;color:var(--text-2)}
+  .mr .chev{color:var(--text-3);flex:none}
+
+  .hp-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--brand);padding:4px 0}
+  .hp-back:hover{text-decoration:underline}
+  .hp-sel{border:1px solid var(--border);border-radius:var(--r-card);padding:12px;background:var(--surface-2)}
+  .hp-sel b{display:block;font-size:14px;font-weight:600}
+  .hp-sel .meta{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--text-2)}
+  .hp-sel .bar{flex:1;height:5px;border-radius:3px;background:var(--surface-3);overflow:hidden}
+  .hp-sel .bar i{display:block;height:100%;background:var(--brand)}
+  .hp-sel .meta b{font-size:12.5px;font-variant-numeric:tabular-nums;display:inline}
+
+  .acc{border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden}
+  .acc + .acc{margin-top:8px}
+  .acc-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;text-align:left}
+  .acc-btn:hover{background:var(--surface-2)}
+  .acc-btn b{font-size:13.5px;font-weight:600}
+  .acc-btn span{font-size:12px;color:var(--text-2);display:block;margin-top:1px;font-variant-numeric:tabular-nums}
+  .acc-btn .chev{margin-left:auto;color:var(--text-3);transition:transform .18s ease}
+  .acc.open .acc-btn .chev{transform:rotate(180deg)}
+  .acc-list{display:none;flex-direction:column;gap:5px;padding:4px 10px 10px;border-top:1px solid var(--border);background:var(--surface-2)}
+  .acc.open .acc-list{display:flex}
+  .acc .chip{cursor:grab}
+  .acc .chip.pick{background:var(--brand-tint);border-color:var(--brand);box-shadow:0 0 0 1px var(--brand) inset}
+  .acc .empty{font-size:12.5px;color:var(--text-3);padding:8px 2px;text-align:center}
+  .hp-foot{padding:12px 16px;border-top:1px solid var(--border);background:var(--surface-2);font-size:12.5px;color:var(--text-2);line-height:1.5;display:flex;gap:8px;align-items:flex-start}
+  .hp-foot svg{flex:none;color:var(--brand);margin-top:2px}
+  .hp-foot.pickmode{background:var(--brand-tint);color:var(--brand);border-top-color:var(--brand-line)}
+  .hp-foot .cancelpick{margin-left:auto;font-weight:600;color:var(--brand);white-space:nowrap;text-decoration:underline}
+
+  /* ================================================================
+     DIALOG (bulk assign confirm)
+     ================================================================ */
+  .dlg-scrim{position:fixed;inset:0;z-index:100;background:rgba(33,37,43,.4);display:none;align-items:center;justify-content:center;padding:20px}
+  .dlg-scrim.in{display:flex}
+  .dlg{width:480px;max-width:100%;background:var(--surface);border-radius:var(--r-card);box-shadow:var(--shadow-2);display:flex;flex-direction:column}
+  .dlg-head{display:flex;align-items:flex-start;gap:10px;padding:18px 20px 6px}
+  .dlg-head h3{font-size:18px}
+  .dlg-head .x{margin-left:auto}
+  .dlg-body{padding:6px 20px 18px;display:flex;flex-direction:column;gap:14px}
+  .dlg-body p{color:var(--text-2);line-height:1.5}
+  .dlg-body p b{color:var(--text);font-weight:600}
+  .dlg-foot{display:flex;align-items:center;gap:8px;padding:14px 20px;border-top:1px solid var(--border);background:var(--surface-2);border-radius:0 0 var(--r-card) var(--r-card)}
+  .dlg-foot .right{margin-left:auto;display:flex;gap:8px}
+  .preview{border:1px solid var(--border);border-radius:var(--r-ctl);max-height:160px;overflow-y:auto;font-size:13px}
+  .preview div{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--border)}
+  .preview div:last-child{border-bottom:0}
+  .preview div span{color:var(--text-3);margin-left:auto;font-size:12px;white-space:nowrap}
+  .preview div .was{color:var(--warn)}
+
+  /* ================================================================
+     TOAST
+     ================================================================ */
+  .toasts{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:120;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+  .toasts .toast{pointer-events:auto}
+  .toast{
+    display:flex;align-items:flex-start;gap:10px;min-width:300px;max-width:420px;
+    background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--ok);border-radius:var(--r-card);
+    box-shadow:var(--shadow-2);padding:12px 14px;font-size:13px;animation:toastin .22s ease;
+  }
+  .toast svg{flex:none;color:var(--ok);margin-top:1px}
+  .toast b{display:block;font-weight:600;margin-bottom:1px}
+  .toast span{color:var(--text-2)}
+  .toast .undo{margin-left:auto;font-weight:600;color:var(--brand);white-space:nowrap;align-self:center}
+  .toast .undo:hover{text-decoration:underline}
+  .toast.info{border-left-color:var(--brand)} .toast.info svg{color:var(--brand)}
+  @keyframes toastin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .empty-state{padding:36px 20px;text-align:center;color:var(--text-3);font-size:13px}
+
+  @media (max-width:1100px){
+    .shell{grid-template-columns:1fr}
+    .sidebar{display:none}
+    .helper.in{width:320px}.helper-inner{width:320px}
+  }
+  @media (max-width:820px){
+    .page{padding:16px}
+    .work{flex-direction:column}
+    .helper.in{width:100%;margin-left:0;margin-top:16px}.helper-inner{width:100%;position:static;max-height:none}
+    .day{min-height:96px}
+    .frow{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-chev" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-left" viewBox="0 0 16 16"><path d="m10 3-5 5 5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-right" viewBox="0 0 16 16"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-x" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-calcheck" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="m5.5 10 1.8 1.8L10.8 8.3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-clip" viewBox="0 0 16 16"><rect x="3" y="2.5" width="10" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 1.5h4v2.5H6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.5 8h5M5.5 11h3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 16 16"><path d="M2 3h12l-4.6 5.4V13l-2.8-1.5V8.4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+    <symbol id="i-grip" viewBox="0 0 8 14"><circle cx="2" cy="2" r="1.2" fill="currentColor"/><circle cx="6" cy="2" r="1.2" fill="currentColor"/><circle cx="2" cy="7" r="1.2" fill="currentColor"/><circle cx="6" cy="7" r="1.2" fill="currentColor"/><circle cx="2" cy="12" r="1.2" fill="currentColor"/><circle cx="6" cy="12" r="1.2" fill="currentColor"/></symbol>
+    <symbol id="i-check" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m5.2 8.2 1.9 1.9 3.8-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-info" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4M8 5v.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 16 16"><path d="M8 2 14.5 13.5h-13z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 6.5v3M8 11.5v.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 20 20"><path d="M5 14V9a5 5 0 0 1 10 0v5l1.5 1.5h-13z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 17.5a1.5 1.5 0 0 0 3 0" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-help" viewBox="0 0 16 16"><path d="M3 12.5V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v7.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M1.5 12.5h13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="m5.5 7.5 2 2 3-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 16 16"><path d="m2.5 13.5.8-3.3 7.4-7.4a1.4 1.4 0 0 1 2 0l.5.5a1.4 1.4 0 0 1 0 2l-7.4 7.4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+    <symbol id="i-user" viewBox="0 0 16 16"><circle cx="8" cy="5.5" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 14a5.5 5.5 0 0 1 11 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-dots" viewBox="0 0 16 16"><circle cx="3.5" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="12.5" cy="8" r="1.3" fill="currentColor"/></symbol>
+    <!-- nav group icons -->
+    <symbol id="n-asset" viewBox="0 0 20 20"><path d="M3 16V8l7-5 7 5v8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 16h14M8 16v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="n-drop" viewBox="0 0 20 20"><path d="M10 2.5c3 3.8 5.5 7 5.5 9.8a5.5 5.5 0 0 1-11 0C4.5 9.5 7 6.3 10 2.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="n-people" viewBox="0 0 20 20"><circle cx="7.5" cy="7" r="2.8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 16a5 5 0 0 1 10 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M13 9.5a2.5 2.5 0 1 0 0-5M14 12.5a4.5 4.5 0 0 1 3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="n-mail" viewBox="0 0 20 20"><rect x="2.5" y="4.5" width="15" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m3 6 7 5 7-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="n-send" viewBox="0 0 20 20"><path d="M3 10 17 3l-3.5 14-3.8-5.2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m9.7 11.8 7.3-8.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="shell">
+  <!-- ============ SIDEBAR HEADER (Calypso nested groups) ============ -->
+  <aside class="sidebar" aria-label="Product navigation">
+    <div class="brand"><span class="brand-logo" role="img" aria-label="120Water"></span></div>
+    <div class="sb-search"><svg width="14" height="14"><use href="#i-search"/></svg>Search</div>
+    <nav class="nav">
+      <div class="grp">
+        <button class="grp-btn" type="button" aria-expanded="false"><svg class="ico"><use href="#n-asset"/></svg>Asset Compliance<svg class="chev"><use href="#i-chev"/></svg></button>
+        <div class="grp-items"><a class="nav-item" href="#">Dashboard</a><a class="nav-item" href="#">Inventory</a><a class="nav-item" href="#">Locations</a><a class="nav-item" href="#">Programs</a></div>
+      </div>
+      <div class="grp open">
+        <button class="grp-btn" type="button" aria-expanded="true"><svg class="ico"><use href="#n-drop"/></svg>Water Quality<svg class="chev"><use href="#i-chev"/></svg></button>
+        <div class="grp-items">
+          <a class="nav-item" href="#">Dashboard</a>
+          <a class="nav-item" href="#">Tasks</a>
+          <a class="nav-item" href="#">Monitoring Requirements</a>
+          <a class="nav-item" href="#">Facilities</a>
+          <a class="nav-item" href="#">Sampling Data</a>
+          <a class="nav-item active" href="#" aria-current="page">Sampling Schedule</a>
+        </div>
+      </div>
+      <div class="grp">
+        <button class="grp-btn" type="button" aria-expanded="false"><svg class="ico"><use href="#n-people"/></svg>Consumer Sampling<svg class="chev"><use href="#i-chev"/></svg></button>
+        <div class="grp-items"><a class="nav-item" href="#">Dashboard</a><a class="nav-item" href="#">Locations</a><a class="nav-item" href="#">Schools and Daycares</a><a class="nav-item" href="#">Residential</a><a class="nav-item" href="#">Exceedances</a><a class="nav-item" href="#">Ordering and Tracking</a><a class="nav-item" href="#">Programs</a></div>
+      </div>
+      <div class="grp">
+        <button class="grp-btn" type="button" aria-expanded="false"><svg class="ico"><use href="#n-mail"/></svg>Communications<svg class="chev"><use href="#i-chev"/></svg></button>
+        <div class="grp-items"><a class="nav-item" href="#">Dashboard</a><a class="nav-item" href="#">Letter Log</a><a class="nav-item" href="#">Templates</a><a class="nav-item" href="#">Programs</a></div>
+      </div>
+      <div class="grp">
+        <button class="grp-btn" type="button" aria-expanded="false"><svg class="ico"><use href="#n-send"/></svg>Submissions<svg class="chev"><use href="#i-chev"/></svg></button>
+        <div class="grp-items"><a class="nav-item" href="#">Dashboard</a><a class="nav-item" href="#">Asset Compliance Submissions</a><a class="nav-item" href="#">Water Quality – MORs</a><a class="nav-item" href="#">Consumer Sampling Submissions</a></div>
+      </div>
+    </nav>
+    <div class="sb-foot">
+      <div class="avatar">TB</div>
+      <div class="who"><b>Troy Barker</b><span>Operator · Riverbend Water</span></div>
+    </div>
+  </aside>
+
+  <!-- ============ CONTENT ============ -->
+  <div class="content">
+
+    <main class="page">
+      <div class="page-head">
+        <div>
+          <h1>Tasks Calendar</h1>
+          <p class="sub">Schedule sampling tasks onto days, then assign them to an operator.</p>
+        </div>
+        <div class="right">
+          <div class="seg" role="group" aria-label="Calendar mode">
+            <button type="button" id="modeSched" aria-pressed="true"><svg width="14" height="14"><use href="#i-clip"/></svg>Scheduled Tasks</button>
+            <button type="button" id="modeDue" aria-pressed="false"><svg width="14" height="14"><use href="#i-calcheck"/></svg>Due Dates</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="work">
+        <section class="cal-card" aria-label="Calendar">
+          <div class="cal-head">
+            <div class="month">
+              <h2 id="monthLabel">March 2026</h2>
+              <button class="nav-arrow" type="button" id="prevBtn" aria-label="Previous"><svg width="16" height="16"><use href="#i-left"/></svg></button>
+              <button class="nav-arrow" type="button" id="nextBtn" aria-label="Next"><svg width="16" height="16"><use href="#i-right"/></svg></button>
+              <span class="saved" id="savedLabel" hidden><svg width="14" height="14"><use href="#i-check"/></svg><span></span></span>
+            </div>
+            <div class="right">
+              <button class="btn" type="button" id="helperBtn" aria-expanded="false" aria-controls="helper"><svg width="16" height="16"><use href="#i-help"/></svg>Scheduling Helper</button>
+              <button class="btn" type="button" id="todayBtn">Today</button>
+              <select class="sel pill" id="viewSel" aria-label="Calendar view">
+                <option value="month">Month view</option>
+                <option value="week">Week view</option>
+              </select>
+            </div>
+          </div>
+          <p class="cal-help" id="calHelp">Click a task to open it. Tick the boxes on tasks to select several, then assign them all at once.</p>
+
+          <div class="cal-tools">
+            <span class="count" id="selCount"><b>0</b> selected</span>
+            <button class="btn primary sm" type="button" id="assignBtn" disabled>Assign tasks</button>
+            <button class="link" type="button" id="clearSel" hidden>Clear selection</button>
+            <div class="right">
+              <button class="btn sm" type="button" id="filterBtn"><svg width="14" height="14"><use href="#i-filter"/></svg>Filters</button>
+            </div>
+          </div>
+
+          <div class="cal-grid" id="grid" role="grid" aria-labelledby="monthLabel"></div>
+        </section>
+
+        <!-- ============ SCHEDULING HELPER (right flyout, non-modal) ============ -->
+        <aside class="helper" id="helper" aria-label="Scheduling Helper" aria-hidden="true">
+          <div class="helper-inner">
+            <div class="hp-head">
+              <div>
+                <h3>Scheduling Helper</h3>
+                <p class="sub" id="hpSub">Pick a monitoring requirement to see its unscheduled tasks.</p>
+              </div>
+              <button class="x" type="button" id="helperClose" aria-label="Close Scheduling Helper"><svg width="16" height="16"><use href="#i-x"/></svg></button>
+            </div>
+            <div class="hp-body" id="hpBody"></div>
+            <div class="hp-foot" id="hpFoot"><svg width="14" height="14"><use href="#i-info"/></svg><span>Changes save automatically</span></div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ DAY POPOVER ============ -->
+<div class="pop" id="pop" role="dialog" aria-modal="false" aria-labelledby="popTitle">
+  <div class="pop-head">
+    <div><h4 id="popTitle"></h4><div class="sub" id="popSub"></div></div>
+    <button class="x" type="button" id="popClose" aria-label="Close"><svg width="16" height="16"><use href="#i-x"/></svg></button>
+  </div>
+  <div class="pop-all" id="popAll"><label><input type="checkbox" class="chk" id="popAllChk">Select all on this day</label><span class="n" id="popAllN"></span></div>
+  <div class="pop-list" id="popList"></div>
+  <div class="pop-foot">
+    <span class="count" id="popCount" style="font-size:13px;color:var(--text-2)"></span>
+    <div class="right">
+      <button class="btn sm" type="button" id="popClose2">Close</button>
+      <button class="btn primary sm" type="button" id="popAssign" disabled>Assign selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TASK DETAILS FLYOUT ============ -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drTitle" aria-hidden="true">
+  <div class="dr-head">
+    <div>
+      <h3 id="drTitle">Task details</h3>
+      <p class="sub" id="drSub"></p>
+    </div>
+    <button class="x" type="button" id="drClose" aria-label="Close"><svg width="16" height="16"><use href="#i-x"/></svg></button>
+  </div>
+  <div class="dr-body" id="drBody"></div>
+  <div class="dr-foot">
+    <button class="btn ghost sm" type="button" id="drUnschedule" style="color:var(--crit)">Unschedule</button>
+    <div class="right">
+      <button class="btn" type="button" id="drCancel">Cancel</button>
+      <button class="btn primary" type="button" id="drSave">Save &amp; close</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ============ BULK ASSIGN DIALOG ============ -->
+<div class="dlg-scrim" id="dlgScrim">
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+    <div class="dlg-head">
+      <h3 id="dlgTitle">Assign tasks</h3>
+      <button class="x" type="button" id="dlgClose" aria-label="Close"><svg width="16" height="16"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="dlg-body">
+      <p id="dlgLead"></p>
+      <div class="field">
+        <label for="dlgOp">Operator <span class="req">*</span></label>
+        <select class="sel" id="dlgOp">
+          <option value="">Choose an operator…</option>
+          <option>Troy Barker</option><option>Maria Lopez</option><option>Devon Price</option><option>Jamie Osei</option>
+        </select>
+      </div>
+      <div class="preview" id="dlgPreview"></div>
+      <div class="note warn" id="dlgWarn" hidden><svg width="14" height="14"><use href="#i-warn"/></svg><span></span></div>
+    </div>
+    <div class="dlg-foot">
+      <div class="right">
+        <button class="btn" type="button" id="dlgCancel">Cancel</button>
+        <button class="btn primary" type="button" id="dlgConfirm" disabled>Assign tasks</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script>
+(function(){
+  'use strict';
+  const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const DOW=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+  const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+  const fmtShort=s=>{const d=parse(s);return `${MON[d.getMonth()].slice(0,3)} ${d.getDate()}`};
+  const fmtLong=s=>{const d=parse(s);return `${DOW[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`};
+  const fmtInput=s=>{const d=parse(s);return `${MON[d.getMonth()].slice(0,3)} ${String(d.getDate()).padStart(2,'0')} ${d.getFullYear()}`};
+  const initials=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+  /* ---------------- seed data ---------------- */
+  const TODAY=new Date(); TODAY.setHours(0,0,0,0);
+  const Y=TODAY.getFullYear(), M=TODAY.getMonth();
+  const dm=(mo,day)=>iso(new Date(Y,M+mo,day));
+
+  const MRS=[
+    {id:'haa5',  name:'Total Haloacetic Acids (HAA5)', code:'HAA5_DS02', analyte:'HAA5',        site:'Distribution System', period:[dm(0,1),dm(0,31)], total:12, un:3},
+    {id:'inorg', name:'Inorganics (IOC)',               code:'IOC_EP01',  analyte:'Inorganics',  site:'Entry Point 01',      period:[dm(0,1),dm(1,30)],  total:20, un:14},
+    {id:'tce',   name:'1,1,1-Trichloroethane (2981)',   code:'VOC_EP01',  analyte:'VOC',         site:'Entry Point 01',      period:[dm(0,1),dm(0,31)], total:10, un:4},
+    {id:'tcr',   name:'Coliform (TCR)',                 code:'COLI_DS001',analyte:'Coliform',    site:'Distribution System', period:[dm(0,1),dm(0,31)], total:16, un:5},
+    {id:'lcr',   name:'Lead and Copper (LCR)',          code:'LCR_DS01',  analyte:'Lead/Copper', site:'Distribution System', period:[dm(0,1),dm(2,30)],  total:14, un:8},
+  ];
+  const OPS=['Troy Barker','Maria Lopez','Devon Price','Jamie Osei'];
+  const tasks=[]; let seq=100;
+  function mk(mr,label,sched,due,assignee,status){
+    tasks.push({id:'t'+(seq++),mrId:mr.id,label,sched,due,assignee:assignee||'',status:status||(sched?(assignee?'Assigned':'Scheduled'):'Unscheduled'),notes:''});
+  }
+  const mrOf=id=>MRS.find(m=>m.id===id);
+  // deterministic seed
+  let r=7; const rnd=n=>{r=(r*48271)%2147483647;return r%n};
+  MRS.forEach((mr,mi)=>{
+    const sched = mr.total-mr.un;
+    for(let i=0;i<mr.total;i++){
+      const label=`Sample ${mi*100+i+1}`;
+      const dueDay = [10,17,24,28][i%4];
+      const dueMo  = mr.id==='lcr' ? (i%3) : (mr.id==='inorg' ? (i%2) : 0);
+      let dd=new Date(Y,M+dueMo,dueDay); if(dd.getDay()===6) dd=addDays(dd,-1); if(dd.getDay()===0) dd=addDays(dd,-2);
+      const due = iso(dd);
+      if(i<sched){
+        // scheduled on a weekday before its due date
+        let d=parse(due); d=addDays(d,-(1+rnd(9))); if(d.getDay()===0)d=addDays(d,1); if(d.getDay()===6)d=addDays(d,-1);
+        const s=iso(d);
+        const past = d<TODAY;
+        let who = rnd(10)<6 ? OPS[rnd(OPS.length)] : '';
+        if(past && !who && rnd(10)<8) who=OPS[rnd(OPS.length)];   // most past work has an owner
+        let st = who?'Assigned':'Scheduled';
+        if(past && who){ st = rnd(10)<8 ? 'Complete' : 'Sent to Lab'; }
+        mk(mr,label,s,due,who,st);
+      } else {
+        mk(mr,label,null,due,'','Unscheduled');
+      }
+    }
+  });
+
+  /* ---------------- state ---------------- */
+  const S={
+    mode:'sched',        // 'sched' | 'due'
+    view:'month',        // 'month' | 'week'
+    anchor:new Date(Y,M,1),
+    selected:new Set(),
+    helperOpen:false, helperMr:null, helperQuery:'', pick:null,
+    openAcc:new Set(),
+    popDate:null, popSel:new Set(),
+    drawerTask:null,
+    dirty:false, saveTimer:null, lastSaved:null,
+    undo:null,
+  };
+
+  /* ---------------- calendar render ---------------- */
+  const grid=$('#grid'), monthLabel=$('#monthLabel');
+  function visibleDays(){
+    if(S.view==='week'){
+      const start=addDays(S.anchor,-S.anchor.getDay());
+      return Array.from({length:7},(_,i)=>addDays(start,i));
+    }
+    const first=new Date(S.anchor.getFullYear(),S.anchor.getMonth(),1);
+    const start=addDays(first,-first.getDay());
+    const last=new Date(S.anchor.getFullYear(),S.anchor.getMonth()+1,0);
+    const n=Math.ceil((last.getDate()+first.getDay())/7)*7;
+    return Array.from({length:n},(_,i)=>addDays(start,i));
+  }
+  function label(){
+    if(S.view==='week'){
+      const d=visibleDays(); const a=d[0], b=d[6];
+      return a.getMonth()===b.getMonth() ? `${MON[a.getMonth()]} ${a.getDate()}–${b.getDate()}, ${b.getFullYear()}`
+        : `${MON[a.getMonth()].slice(0,3)} ${a.getDate()} – ${MON[b.getMonth()].slice(0,3)} ${b.getDate()}, ${b.getFullYear()}`;
+    }
+    return `${MON[S.anchor.getMonth()]} ${S.anchor.getFullYear()}`;
+  }
+  const schedOn=d=>tasks.filter(t=>t.sched===d).sort((a,b)=>a.label.localeCompare(b.label,undefined,{numeric:true}));
+  const dueOn=d=>tasks.filter(t=>t.due===d);
+  const taskClass=t=>t.status==='Complete'?'done':(t.assignee?'assigned':'')+(t.sched&&parse(t.sched)<TODAY&&t.status!=='Complete'&&t.status!=='Sent to Lab'?' overdue':'');
+  const statusCls=s=>s==='Complete'?'ok':s==='Sent to Lab'?'brand':s==='Unscheduled'?'crit':'';
+
+  function chipHTML(t,{draggable=true,checkbox=true}={}){
+    const mr=mrOf(t.mrId);
+    return `<div class="chip ${taskClass(t)} ${S.selected.has(t.id)?'sel':''}" data-id="${t.id}" ${draggable?'draggable="true"':''} role="button" tabindex="0"
+      aria-label="${esc(mr.analyte)} ${esc(t.label)}${t.assignee?', assigned to '+esc(t.assignee):''}, click to open">
+      ${checkbox?`<label class="chip-chk" draggable="false"><input type="checkbox" class="chk" data-sel="${t.id}" ${S.selected.has(t.id)?'checked':''} aria-label="Select ${esc(t.label)}"></label>`:''}
+      <span class="nm" title="${esc(mr.analyte)} · ${esc(t.label)}">${(S.view==='week'||!checkbox)?`<small>${esc(mr.analyte)} ·</small> `:''}${esc(t.label)}</span>
+      ${t.assignee?`<span class="who" title="${esc(t.assignee)}">${initials(t.assignee)}</span>`:''}
+      ${checkbox?'':'<svg class="grip" width="8" height="14"><use href="#i-grip"/></svg>'}
+    </div>`;
+  }
+  function dueHTML(d,list){
+    const done=list.filter(t=>t.status==='Complete').length, n=list.length;
+    const past=parse(d)<TODAY;
+    const cls = done===n?'ok' : (past?'crit':'');
+    const pct=Math.round(done/n*100);
+    return `<button class="due ${cls}" type="button" data-due="${d}" aria-label="${done} of ${n} tasks complete, due ${fmtLong(d)}">
+      <span class="l"><b>${done}/${n}</b><span>${done===n?'complete':past?'overdue':'complete'}</span><svg width="14" height="14"><use href="#i-dots"/></svg></span>
+      <span class="bar"><i style="width:${pct}%"></i></span></button>`;
+  }
+
+  function render(){
+    monthLabel.textContent=label();
+    const days=visibleDays();
+    grid.classList.toggle('week',S.view==='week');
+    const MAX = S.view==='week' ? 99 : 3;
+    let h=DOW.map((d,i)=>`<div class="dow ${i===0||i===6?'wknd':''}" role="columnheader">${d.slice(0,3)}</div>`).join('');
+    const todayIso=iso(TODAY);
+    for(const d of days){
+      const s=iso(d);
+      const out=S.view==='month'&&d.getMonth()!==S.anchor.getMonth();
+      const wk=d.getDay()===0||d.getDay()===6;
+      let body='', count='';
+      if(S.mode==='sched'){
+        const list=schedOn(s);
+        if(list.length) count=`<span class="dcount">${list.length}</span>`;
+        body=list.slice(0,MAX).map(t=>chipHTML(t)).join('');
+        if(list.length>MAX) body+=`<button class="more" type="button" data-more="${s}">+ ${list.length-MAX} more</button>`;
+      } else {
+        const list=dueOn(s);
+        if(list.length) body=dueHTML(s,list);
+      }
+      h+=`<div class="day ${out?'out':''} ${wk?'wknd':''} ${s===todayIso?'today':''} ${S.pick?'target-mode':''}" data-date="${s}" role="gridcell" aria-label="${fmtLong(s)}">
+        <span class="dnum">${d.getDate()===1||S.view==='week'?MON[d.getMonth()].slice(0,3)+' ':''}${d.getDate()}</span>${count}${body}</div>`;
+    }
+    grid.innerHTML=h;
+    renderSelCount();
+    $('#calHelp').textContent = S.mode==='sched'
+      ? 'Click a task to open it. Tick the boxes on tasks to select several, then assign them all at once. Drag a task to move it to another day.'
+      : 'Each card shows how many tasks due that day are complete. Click a card to see the tasks and assign any that still need an operator.';
+  }
+  function renderSelCount(){
+    const n=S.selected.size;
+    $('#selCount').innerHTML=`<b>${n}</b> selected`;
+    $('#assignBtn').disabled=n===0;
+    $('#clearSel').hidden=n===0;
+  }
+
+  /* ---------------- navigation ---------------- */
+  $('#prevBtn').onclick=()=>{S.anchor = S.view==='week'?addDays(S.anchor,-7):new Date(S.anchor.getFullYear(),S.anchor.getMonth()-1,1); render();};
+  $('#nextBtn').onclick=()=>{S.anchor = S.view==='week'?addDays(S.anchor,7):new Date(S.anchor.getFullYear(),S.anchor.getMonth()+1,1); render();};
+  $('#todayBtn').onclick=()=>{S.anchor = S.view==='week'?new Date(TODAY):new Date(Y,M,1); render();};
+  $('#viewSel').onchange=e=>{S.view=e.target.value; if(S.view==='week'){ if(S.anchor.getDate()===1&&S.anchor.getMonth()===M) S.anchor=new Date(TODAY);} else S.anchor=new Date(S.anchor.getFullYear(),S.anchor.getMonth(),1); render();};
+  function setMode(m){
+    S.mode=m; $('#modeSched').setAttribute('aria-pressed',m==='sched'); $('#modeDue').setAttribute('aria-pressed',m==='due');
+    S.selected.clear(); closePop();
+    if(m==='due' && S.helperOpen){ toggleHelper(false); return; }
+    render();
+  }
+  $('#modeSched').onclick=()=>setMode('sched'); $('#modeDue').onclick=()=>setMode('due');
+
+  /* ---------------- selection + chip interactions ---------------- */
+  grid.addEventListener('change',e=>{
+    const id=e.target.dataset.sel; if(!id) return;
+    e.target.checked?S.selected.add(id):S.selected.delete(id);
+    e.target.closest('.chip').classList.toggle('sel',e.target.checked); renderSelCount();
+  });
+  grid.addEventListener('click',e=>{
+    if(S.pick){ const day=e.target.closest('.day'); if(day) placeTask(S.pick,day.dataset.date); return; }
+    if(e.target.closest('.chip-chk')) return;
+    const more=e.target.closest('[data-more]'); if(more){openPop(more.dataset.more,more);return;}
+    const due=e.target.closest('[data-due]'); if(due){openPop(due.dataset.due,due);return;}
+    const chip=e.target.closest('.chip'); if(chip){openDrawer(chip.dataset.id);return;}
+    const day=e.target.closest('.day'); if(day&&S.pick){placeTask(S.pick,day.dataset.date);return;}
+  });
+  grid.addEventListener('keydown',e=>{
+    const chip=e.target.closest('.chip'); if(!chip) return;
+    if(e.key==='Enter'){openDrawer(chip.dataset.id)}
+    if(e.key===' '){e.preventDefault(); const c=$('.chk',chip); c.checked=!c.checked; c.dispatchEvent(new Event('change',{bubbles:true}))}
+  });
+  $('#clearSel').onclick=()=>{S.selected.clear();render();};
+  $('#assignBtn').onclick=()=>openAssign([...S.selected]);
+  $('#filterBtn').onclick=()=>toast('Filters','Filters open in a right-side flyout — same pattern as the table pages. Not wired in this prototype.','info');
+
+  /* ---------------- drag & drop (calendar ↔ calendar, helper → calendar) ---------------- */
+  let dragId=null;
+  document.addEventListener('dragstart',e=>{
+    const chip=e.target.closest&&e.target.closest('.chip[draggable]'); if(!chip) return;
+    dragId=chip.dataset.id; chip.classList.add('dragging');
+    e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',dragId);
+  });
+  document.addEventListener('dragend',e=>{ $$('.chip.dragging').forEach(c=>c.classList.remove('dragging')); $$('.day.drop-ok').forEach(d=>d.classList.remove('drop-ok')); dragId=null; });
+  grid.addEventListener('dragover',e=>{ const day=e.target.closest('.day'); if(!day||!dragId||S.mode!=='sched') return; e.preventDefault(); e.dataTransfer.dropEffect='move'; $$('.day.drop-ok').forEach(d=>d!==day&&d.classList.remove('drop-ok')); day.classList.add('drop-ok'); });
+  grid.addEventListener('dragleave',e=>{ const day=e.target.closest('.day'); if(day&&!day.contains(e.relatedTarget)) day.classList.remove('drop-ok'); });
+  grid.addEventListener('drop',e=>{ const day=e.target.closest('.day'); if(!day||!dragId) return; e.preventDefault(); placeTask(dragId,day.dataset.date); });
+
+  function placeTask(id,date){
+    const t=tasks.find(x=>x.id===id); if(!t) return;
+    const was=t.sched, wasStatus=t.status;
+    if(was===date){ S.pick=null; render(); renderHelper(); return; }
+    t.sched=date; if(t.status==='Unscheduled') t.status=t.assignee?'Assigned':'Scheduled';
+    S.pick=null;
+    const mr=mrOf(t.mrId);
+    markDirty();
+    render(); renderHelper();
+  }
+
+  /* ---------------- day popover ---------------- */
+  const pop=$('#pop');
+  function openPop(date,anchorEl){
+    S.popDate=date; S.popSel=new Set();
+    const byLabel=(a,b)=>a.label.localeCompare(b.label,undefined,{numeric:true});
+    const all = (S.mode==='sched'?schedOn(date):dueOn(date)).slice().sort(byLabel);
+    const open = all.filter(t=>t.status!=='Complete'), finished = all.filter(t=>t.status==='Complete');
+    const list = open.concat(finished);   // completed always sink to the bottom
+    $('#popTitle').textContent = S.mode==='sched' ? `Tasks scheduled on ${fmtShort(date)}` : `Tasks due ${fmtShort(date)}`;
+    const done=list.filter(t=>t.status==='Complete').length;
+    $('#popSub').textContent = S.mode==='sched' ? `${list.length} task${list.length===1?'':'s'} · ${fmtLong(date)}` : `${done} of ${list.length} complete · ${list.filter(t=>!t.assignee).length} still need an operator`;
+    $('#popAllN').textContent = finished.length ? `${open.length} selectable` : `${open.length} tasks`;
+    $('#popAll').hidden = !open.length;
+    const rowHTML=t=>{const mr=mrOf(t.mrId);return `
+      <${t.status==='Complete'?'div':'label'} class="prow ${t.status==='Complete'?'locked':''}" data-id="${t.id}">
+        ${t.status==='Complete'
+          ? '<svg class="done-ico" aria-hidden="true"><use href="#i-check"/></svg>'
+          : `<input type="checkbox" class="chk" data-psel="${t.id}" aria-label="Select ${esc(mr.analyte)} ${esc(t.label)}">`}
+        <span class="tx">
+          <b>${esc(mr.analyte)} · ${esc(t.label)}</b>
+          <span>${esc(mr.site)} · ${t.sched?'scheduled '+fmtShort(t.sched)+' · ':''}due ${fmtShort(t.due)}${t.assignee?' · '+esc(t.assignee):' · <em style="font-style:normal;color:var(--warn)">no operator</em>'}</span>
+        </span>
+        <span class="st ${statusCls(t.status)}">${esc(t.status)}</span>
+        <button class="open" type="button" data-open="${t.id}" aria-label="Open ${esc(mr.analyte)} ${esc(t.label)} details" title="Open task details"><svg width="14" height="14"><use href="#i-right"/></svg></button>
+      </${t.status==='Complete'?'div':'label'}>`};
+    $('#popList').innerHTML = !all.length ? `<div class="empty-state">Nothing here.</div>`
+      : open.map(rowHTML).join('')
+        + (finished.length ? `<div class="plist-sep">Completed · ${finished.length}</div>` + finished.map(rowHTML).join('') : '');
+    pop.classList.add('in'); updatePopFoot();
+    // position near anchor, kept on-screen
+    const r=anchorEl.getBoundingClientRect(); const W=pop.offsetWidth, H=pop.offsetHeight;
+    let left=r.left, top=r.bottom+8;
+    if(left+W>innerWidth-16) left=innerWidth-16-W;
+    if(top+H>innerHeight-16) top=Math.max(16,r.top-8-H);
+    if(top+H>innerHeight-16) top=Math.max(16,innerHeight-16-H);
+    pop.style.left=left+'px'; pop.style.top=top+'px';
+    $('#popAllChk').checked=false; $('#popAllChk').indeterminate=false;
+    setTimeout(()=>$('#popClose').focus(),0);
+  }
+  function updatePopFoot(){
+    const n=S.popSel.size; $('#popCount').textContent=n?`${n} selected`:''; $('#popAssign').disabled=n===0;
+    const boxes=$$('[data-psel]:not([disabled])',pop); const all=$('#popAllChk');
+    all.indeterminate = n>0 && n<boxes.length; all.checked = n>0 && n===boxes.length;
+  }
+  pop.addEventListener('change',e=>{
+    if(e.target.id==='popAllChk'){ $$('[data-psel]:not([disabled])',pop).forEach(b=>{b.checked=e.target.checked; e.target.checked?S.popSel.add(b.dataset.psel):S.popSel.delete(b.dataset.psel)}); updatePopFoot(); return; }
+    const id=e.target.dataset.psel; if(!id) return; e.target.checked?S.popSel.add(id):S.popSel.delete(id); updatePopFoot();
+  });
+  pop.addEventListener('click',e=>{ const o=e.target.closest('[data-open]'); if(o){e.preventDefault();openDrawer(o.dataset.open)} });
+  function closePop(){pop.classList.remove('in');S.popDate=null;}
+  $('#popClose').onclick=$('#popClose2').onclick=closePop;
+  $('#popAssign').onclick=()=>openAssign([...S.popSel]);
+  document.addEventListener('mousedown',e=>{ if(pop.classList.contains('in') && !pop.contains(e.target) && !e.target.closest('[data-more],[data-due]') && !$('#dlgScrim').classList.contains('in') && !$('#drawer').classList.contains('in')) closePop(); });
+  addEventListener('resize',()=>closePop());
+
+  /* ---------------- task details drawer ---------------- */
+  const drawer=$('#drawer'), scrim=$('#scrim');
+  function openDrawer(id){
+    const t=tasks.find(x=>x.id===id); if(!t) return; S.drawerTask=id; const mr=mrOf(t.mrId);
+    $('#drTitle').textContent=`${mr.analyte} · ${t.label}`;
+    $('#drSub').textContent=`${mr.name} · ${mr.site}`;
+    $('#drBody').innerHTML=`
+      <dl class="kv">
+        <dt>Status</dt><dd><span class="status-pill ${statusCls(t.status)}">${esc(t.status)}</span></dd>
+        <dt>Monitoring requirement</dt><dd><a href="#">${esc(mr.code)}</a></dd>
+        <dt>Compliance period</dt><dd>${fmtShort(mr.period[0])} – ${fmtLong(mr.period[1])}</dd>
+        <dt>Assigned to</dt><dd>${t.assignee?esc(t.assignee)+' · <span style="color:var(--text-3);font-weight:400">317-555-0123</span>':'<span style="color:var(--warn)">No operator yet</span>'}</dd>
+      </dl>
+      <div class="divider"></div>
+      <div class="field"><label for="fStatus">Status <span class="req">*</span></label>
+        <select class="sel" id="fStatus">${['Unscheduled','Scheduled','Assigned','Sent to Lab','Complete'].map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="frow">
+        <div class="field"><label for="fStart">Start date</label><input class="inp" type="date" id="fStart" value="${mr.period[0]}" readonly></div>
+        <div class="field"><label for="fDue">Due date <span class="req">*</span></label><input class="inp" type="date" id="fDue" value="${t.due}"></div>
+      </div>
+      <div class="field"><label for="fSched">Scheduled date</label>
+        <input class="inp" type="date" id="fSched" value="${t.sched||''}">
+        <span class="hint">${t.sched?'Changing this moves the task on the calendar.':'Not on the calendar yet — pick a date, or drag it from the Scheduling Helper.'}</span></div>
+      <div class="field"><label for="fWho">Assignee</label>
+        <select class="sel" id="fWho"><option value="">Choose an operator…</option>${OPS.map(o=>`<option ${o===t.assignee?'selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="field"><label>Results</label><div><button class="btn sm" type="button" id="fResult"><svg width="14" height="14"><use href="#i-pencil"/></svg>Add sample result</button></div></div>
+      <div class="field"><label for="fNotes">Notes</label><textarea class="ta" id="fNotes" placeholder="Add optional notes">${esc(t.notes)}</textarea></div>`;
+    $('#drUnschedule').hidden=!t.sched;
+    drawer.classList.add('in'); drawer.setAttribute('aria-hidden','false'); scrim.classList.add('in');
+    setTimeout(()=>$('#fStatus').focus(),60);
+    $('#fResult').onclick=()=>toast('Sample result','Result entry would open here — out of scope for the calendar page.','info');
+  }
+  function closeDrawer(){drawer.classList.remove('in');drawer.setAttribute('aria-hidden','true');scrim.classList.remove('in');S.drawerTask=null;}
+  $('#drClose').onclick=$('#drCancel').onclick=closeDrawer; scrim.onclick=closeDrawer;
+  $('#drSave').onclick=()=>{
+    const t=tasks.find(x=>x.id===S.drawerTask); if(!t) return;
+    const sched=$('#fSched').value||null, who=$('#fWho').value, st=$('#fStatus').value;
+    t.sched=sched; t.assignee=who; t.notes=$('#fNotes').value; if($('#fDue').value) t.due=$('#fDue').value;
+    t.status = sched ? (st==='Unscheduled'?(who?'Assigned':'Scheduled'):st) : 'Unscheduled';
+    if(who&&t.status==='Scheduled') t.status='Assigned';
+    closeDrawer(); render(); renderHelper(); if(S.popDate) closePop();
+    toast('Saved',`${mrOf(t.mrId).analyte} · ${t.label} has been updated.`,'ok');
+  };
+  $('#drUnschedule').onclick=()=>{
+    const t=tasks.find(x=>x.id===S.drawerTask); if(!t) return; const was=t.sched, wasSt=t.status;
+    t.sched=null; t.status='Unscheduled'; markDirty(); closeDrawer(); closePop(); render(); renderHelper();
+
+  };
+
+  /* ---------------- bulk assign dialog ---------------- */
+  const dlg=$('#dlgScrim'); let assignIds=[];
+  function openAssign(ids){
+    assignIds=ids.filter(id=>{const t=tasks.find(x=>x.id===id);return t&&t.status!=='Complete'}); if(!assignIds.length) return;
+    const list=assignIds.map(id=>tasks.find(x=>x.id===id));
+    const over=list.filter(t=>t.assignee);
+    $('#dlgLead').innerHTML=`Choose one operator for these <b>${list.length} task${list.length===1?'':'s'}</b>. Nothing changes until you press <b>Assign tasks</b>.`;
+    $('#dlgPreview').innerHTML=list.map(t=>`<div><b style="font-weight:500">${esc(mrOf(t.mrId).analyte)} · ${esc(t.label)}</b><span>${t.sched?fmtShort(t.sched):'unscheduled'}${t.assignee?` · <em class="was" style="font-style:normal">currently ${esc(t.assignee)}</em>`:''}</span></div>`).join('');
+    const w=$('#dlgWarn'); w.hidden=!over.length; if(over.length) $('span',w).textContent=`${over.length} of these task${over.length===1?' is':'s are'} already assigned. Assigning will replace the current operator.`;
+    $('#dlgOp').value=''; $('#dlgConfirm').disabled=true;
+    dlg.classList.add('in'); setTimeout(()=>$('#dlgOp').focus(),0);
+  }
+  function closeAssign(){dlg.classList.remove('in');}
+  $('#dlgOp').onchange=e=>{$('#dlgConfirm').disabled=!e.target.value;};
+  $('#dlgClose').onclick=$('#dlgCancel').onclick=closeAssign;
+  dlg.addEventListener('mousedown',e=>{if(e.target===dlg)closeAssign()});
+  $('#dlgConfirm').onclick=()=>{
+    const op=$('#dlgOp').value; const prev=assignIds.map(id=>{const t=tasks.find(x=>x.id===id);return [id,t.assignee,t.status]});
+    assignIds.forEach(id=>{const t=tasks.find(x=>x.id===id); t.assignee=op; if(t.status==='Scheduled') t.status='Assigned';});
+    const n=assignIds.length; S.selected.clear(); S.popSel.clear(); closeAssign(); closePop(); render(); renderHelper();
+    toast('Saved',`${n} task${n===1?'':'s'} assigned to ${op}.`,'ok',()=>{prev.forEach(([id,a,s])=>{const t=tasks.find(x=>x.id===id);t.assignee=a;t.status=s});render();renderHelper();});
+  };
+
+  /* ---------------- scheduling helper ---------------- */
+  const helper=$('#helper'), hpBody=$('#hpBody'), hpFoot=$('#hpFoot'), hpSub=$('#hpSub');
+  function toggleHelper(open){
+    S.helperOpen=open; helper.classList.toggle('in',open); helper.setAttribute('aria-hidden',String(!open));
+    $('#helperBtn').setAttribute('aria-expanded',String(open)); $('#helperBtn').classList.toggle('on',open);
+    if(!open){S.pick=null;render();} else { if(S.mode!=='sched') setMode('sched'); renderHelper(); }
+  }
+  $('#helperBtn').onclick=()=>toggleHelper(!S.helperOpen);
+  $('#helperClose').onclick=()=>toggleHelper(false);
+
+  const mrStats=mr=>{const all=tasks.filter(t=>t.mrId===mr.id);const s=all.filter(t=>t.sched).length;return {total:all.length,sched:s,un:all.length-s}};
+  function ringHTML(pct,ok){const C=2*Math.PI*14;return `<span class="ring ${ok?'ok':''}"><svg viewBox="0 0 34 34"><circle class="bg" cx="17" cy="17" r="14"/><circle class="fg" cx="17" cy="17" r="14" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}"/></svg><span class="pct">${Math.round(pct*100)}%</span></span>`}
+
+  function renderHelper(){
+    if(!S.helperOpen) return;
+    if(!S.helperMr){
+      hpSub.textContent='Pick a monitoring requirement to see its unscheduled tasks.';
+      const q=S.helperQuery.trim().toLowerCase();
+      const list=MRS.filter(m=>!q||m.name.toLowerCase().includes(q)||m.code.toLowerCase().includes(q)||m.analyte.toLowerCase().includes(q))
+        .map(m=>({m,...mrStats(m)})).sort((a,b)=>b.un-a.un);
+      hpBody.innerHTML=`
+        <label class="hp-search"><svg width="14" height="14"><use href="#i-search"/></svg><input id="hpSearch" placeholder="Search monitoring requirements" value="${esc(S.helperQuery)}" aria-label="Search monitoring requirements"></label>
+        <div class="hp-lead">${q?'Matches':'Needs scheduling first'}</div>
+        ${list.map(({m,total,sched,un})=>`<button class="mr" type="button" data-mr="${m.id}">
+            ${ringHTML(sched/total,un===0)}
+            <span class="tx"><b>${esc(m.name)}</b><span class="${un===0?'ok':un>total/2?'warn':''}">${un===0?'All '+total+' tasks scheduled':`${sched}/${total} scheduled · ${un} to go`}</span></span>
+            <svg class="chev" width="16" height="16"><use href="#i-right"/></svg></button>`).join('')||`<div class="empty-state">No monitoring requirements match “${esc(S.helperQuery)}”.</div>`}`;
+      const inp=$('#hpSearch'); inp.oninput=e=>{S.helperQuery=e.target.value; const pos=e.target.selectionStart; renderHelper(); const i2=$('#hpSearch'); i2.focus(); i2.setSelectionRange(pos,pos);};
+      $$('[data-mr]',hpBody).forEach(b=>b.onclick=()=>{S.helperMr=b.dataset.mr; S.openAcc=new Set(); renderHelper();});
+      hpFoot.className='hp-foot'; hpFoot.innerHTML=`<svg width="14" height="14"><use href="#i-info"/></svg><span>Changes save automatically</span>`;
+      return;
+    }
+    const mr=mrOf(S.helperMr); const st=mrStats(mr);
+    hpSub.textContent='Drag a task onto a day — or click it, then click the day.';
+    const un=tasks.filter(t=>t.mrId===mr.id&&!t.sched);
+    const groups=new Map();
+    un.forEach(t=>{const d=parse(t.due);const k=`${d.getFullYear()}-${d.getMonth()}`;if(!groups.has(k))groups.set(k,{label:`Due ${MON[d.getMonth()]} ${d.getFullYear()}`,items:[]});groups.get(k).items.push(t);});
+    const keys=[...groups.keys()].sort(); if(S.openAcc.size===0&&keys.length) S.openAcc.add(keys[0]);
+    hpBody.innerHTML=`
+      <button class="hp-back" type="button" id="hpBack"><svg width="14" height="14"><use href="#i-left"/></svg>All monitoring requirements</button>
+      <div class="hp-sel"><b>${esc(mr.name)}</b>
+        <div class="meta"><span class="bar"><i style="width:${Math.round(st.sched/st.total*100)}%"></i></span><b>${st.sched}/${st.total}</b> scheduled</div>
+        <div class="meta" style="margin-top:4px">${esc(mr.code)} · ${esc(mr.site)}</div></div>
+      <div class="hp-lead">${un.length?`${un.length} unscheduled task${un.length===1?'':'s'}`:'Nothing left to schedule'}</div>
+      ${keys.map(k=>{const g=groups.get(k);return `<div class="acc ${S.openAcc.has(k)?'open':''}" data-acc="${k}">
+          <button class="acc-btn" type="button" aria-expanded="${S.openAcc.has(k)}"><span><b>${esc(g.label)}</b><span>${g.items.length} unscheduled</span></span><svg class="chev" width="16" height="16"><use href="#i-chev"/></svg></button>
+          <div class="acc-list">${g.items.sort((a,b)=>a.label.localeCompare(b.label,undefined,{numeric:true})).map(t=>chipHTML(t,{checkbox:false}).replace('class="chip',`class="chip ${S.pick===t.id?'pick':''}`)).join('')}</div></div>`}).join('')
+        || `<div class="note info"><svg width="14" height="14"><use href="#i-check"/></svg><span>Every task for this requirement is on the calendar. Pick another requirement to keep going.</span></div>`}`;
+    $('#hpBack').onclick=()=>{S.helperMr=null;S.pick=null;render();renderHelper();};
+    $$('.acc-btn',hpBody).forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.acc;S.openAcc.has(k)?S.openAcc.delete(k):S.openAcc.add(k);renderHelper();});
+    $$('.acc .chip',hpBody).forEach(c=>{
+      c.onclick=()=>{S.pick = S.pick===c.dataset.id?null:c.dataset.id; render(); renderHelper();};
+      c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();c.click();}};
+      c.setAttribute('aria-label',`${mr.analyte} ${c.querySelector('.nm').textContent.trim()}, drag onto a day or press Enter then choose a day`);
+    });
+    if(S.pick){
+      const t=tasks.find(x=>x.id===S.pick);
+      hpFoot.className='hp-foot pickmode'; hpFoot.innerHTML=`<svg width="14" height="14"><use href="#i-info"/></svg><span>Now click a day on the calendar to put <b>${esc(t.label)}</b> there (due ${fmtShort(t.due)}).</span><button class="cancelpick" type="button" id="cancelPick">Cancel</button>`;
+      $('#cancelPick').onclick=()=>{S.pick=null;render();renderHelper();};
+    } else {
+      hpFoot.className='hp-foot'; hpFoot.innerHTML=`<svg width="14" height="14"><use href="#i-info"/></svg><span>Changes save automatically</span>`;
+    }
+  }
+
+  /* ---------------- autosave + toast ---------------- */
+  const SAVE_DELAY=5000;
+  function armSave(){
+    clearTimeout(S.saveTimer);
+    S.saveTimer=setTimeout(()=>{
+      S.dirty=false; S.lastSaved=new Date();
+      const hh=S.lastSaved.getHours()%12||12, mm=String(S.lastSaved.getMinutes()).padStart(2,'0'), ap=S.lastSaved.getHours()<12?'AM':'PM';
+      const el=$('#savedLabel'); el.hidden=false; el.classList.remove('pending'); $('span',el).textContent=`Saved ${hh}:${mm} ${ap}`;
+      toast('Saved','Your recent changes have been saved.','ok');
+    },SAVE_DELAY);
+  }
+  function markDirty(){
+    S.dirty=true;
+    const el=$('#savedLabel'); el.hidden=false; el.classList.add('pending'); $('span',el).textContent='Unsaved changes';
+    armSave();
+  }
+  // still working? keep waiting — any interaction with the calendar or helper resets the 5s clock
+  ['pointerdown','dragstart','dragover','keydown'].forEach(ev=>document.addEventListener(ev,e=>{
+    if(S.dirty && (e.target.closest&&e.target.closest('#grid,#helper'))) armSave();
+  },true));
+  function toast(title,msg,kind,undo){
+    const box=$('#toasts'); const el=document.createElement('div'); el.className='toast '+(kind||'');
+    el.innerHTML=`<svg width="16" height="16"><use href="#${kind==='info'?'i-info':'i-check'}"/></svg><div><b>${esc(title)}</b><span>${esc(msg)}</span></div>${undo?'<button class="undo" type="button">Undo</button>':''}`;
+    if(undo) $('.undo',el).onclick=()=>{undo();el.remove();toast('Undone','That change was reversed.','info');};
+    box.appendChild(el); setTimeout(()=>{el.style.transition='opacity .3s';el.style.opacity='0';setTimeout(()=>el.remove(),320)},undo?6000:3600);
+    while(box.children.length>3) box.firstChild.remove();
+  }
+
+  /* ---------------- misc: sidebar groups, escape ---------------- */
+  $$('.grp-btn').forEach(b=>b.onclick=()=>{const g=b.parentElement;g.classList.toggle('open');b.setAttribute('aria-expanded',g.classList.contains('open'));});
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='Escape') return;
+    if(dlg.classList.contains('in')) return closeAssign();
+    if(drawer.classList.contains('in')) return closeDrawer();
+    if(pop.classList.contains('in')) return closePop();
+    if(S.pick){S.pick=null;render();renderHelper();return;}
+    if(S.helperOpen) return toggleHelper(false);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
